@@ -9,7 +9,12 @@ import voluptuous as vol
 
 from homeassistant.components import mqtt
 import homeassistant.components.alarm_control_panel as alarm
-from homeassistant.components.alarm_control_panel import AlarmControlPanelEntityFeature
+from homeassistant.components.alarm_control_panel import (
+    SERVICE_RESPONSE_CODE_INVALID_CODE,
+    SERVICE_RESPONSE_STATUS_FAIL,
+    SERVICE_RESPONSE_STATUS_SUCCESS,
+    AlarmControlPanelEntityFeature,
+)
 from homeassistant.const import (
     CONF_CODE,
     CONF_DELAY_TIME,
@@ -351,57 +356,81 @@ class ManualMQTTAlarm(alarm.AlarmControlPanelEntity):
 
     async def async_alarm_disarm(self, code: str | None = None) -> ServiceResponse:
         """Send disarm command."""
-        if self._async_validate_code(code, STATE_ALARM_DISARMED):
-            self._state = STATE_ALARM_DISARMED
-            self._state_ts = dt_util.utcnow()
-            self.async_schedule_update_ha_state()
+        if not self._async_validate_code(code, STATE_ALARM_DISARMED):
+            return {
+                "status": SERVICE_RESPONSE_STATUS_FAIL,
+                "code": SERVICE_RESPONSE_CODE_INVALID_CODE,
+            }
 
-            return {"status": "success"}
-        return {"status": "fail", "code": "invalid_code"}
+        self._state = STATE_ALARM_DISARMED
+        self._state_ts = dt_util.utcnow()
+        self.async_schedule_update_ha_state()
+
+        return {"status": SERVICE_RESPONSE_STATUS_SUCCESS}
 
     async def async_alarm_arm_home(self, code: str | None = None) -> ServiceResponse:
         """Send arm home command."""
-        if self._async_validate_code(code, STATE_ALARM_ARMED_HOME):
-            self._async_update_state(STATE_ALARM_ARMED_HOME)
+        if not self._async_validate_code(code, STATE_ALARM_ARMED_HOME):
+            return {
+                "status": SERVICE_RESPONSE_STATUS_FAIL,
+                "code": SERVICE_RESPONSE_CODE_INVALID_CODE,
+            }
 
-            return {"status": "success"}
-        return {"status": "fail", "code": "invalid_code"}
+        self._async_update_state(STATE_ALARM_ARMED_HOME)
+
+        return {"status": SERVICE_RESPONSE_STATUS_SUCCESS}
 
     async def async_alarm_arm_away(self, code: str | None = None) -> ServiceResponse:
         """Send arm away command."""
-        if self._async_validate_code(code, STATE_ALARM_ARMED_AWAY):
-            self._async_update_state(STATE_ALARM_ARMED_AWAY)
+        if not self._async_validate_code(code, STATE_ALARM_ARMED_AWAY):
+            return {
+                "status": SERVICE_RESPONSE_STATUS_FAIL,
+                "code": SERVICE_RESPONSE_CODE_INVALID_CODE,
+            }
 
-            return {"status": "success"}
-        return {"status": "fail", "code": "invalid_code"}
+        self._async_update_state(STATE_ALARM_ARMED_AWAY)
+
+        return {"status": SERVICE_RESPONSE_STATUS_SUCCESS}
 
     async def async_alarm_arm_night(self, code: str | None = None) -> ServiceResponse:
         """Send arm night command."""
-        if self._async_validate_code(code, STATE_ALARM_ARMED_NIGHT):
-            self._async_update_state(STATE_ALARM_ARMED_NIGHT)
+        if not self._async_validate_code(code, STATE_ALARM_ARMED_NIGHT):
+            return {
+                "status": SERVICE_RESPONSE_STATUS_FAIL,
+                "code": SERVICE_RESPONSE_CODE_INVALID_CODE,
+            }
 
-            return {"status": "success"}
-        return {"status": "fail", "code": "invalid_code"}
+        self._async_update_state(STATE_ALARM_ARMED_NIGHT)
+
+        return {"status": SERVICE_RESPONSE_STATUS_SUCCESS}
 
     async def async_alarm_arm_vacation(
         self, code: str | None = None
     ) -> ServiceResponse:
         """Send arm vacation command."""
-        if self._async_validate_code(code, STATE_ALARM_ARMED_VACATION):
-            self._async_update_state(STATE_ALARM_ARMED_VACATION)
+        if not self._async_validate_code(code, STATE_ALARM_ARMED_VACATION):
+            return {
+                "status": SERVICE_RESPONSE_STATUS_FAIL,
+                "code": SERVICE_RESPONSE_CODE_INVALID_CODE,
+            }
 
-            return {"status": "success"}
-        return {"status": "fail", "code": "invalid_code"}
+        self._async_update_state(STATE_ALARM_ARMED_VACATION)
+
+        return {"status": SERVICE_RESPONSE_STATUS_SUCCESS}
 
     async def async_alarm_arm_custom_bypass(
         self, code: str | None = None
     ) -> ServiceResponse:
         """Send arm custom bypass command."""
-        if self._async_validate_code(code, STATE_ALARM_ARMED_CUSTOM_BYPASS):
-            self._async_update_state(STATE_ALARM_ARMED_CUSTOM_BYPASS)
+        if not self._async_validate_code(code, STATE_ALARM_ARMED_CUSTOM_BYPASS):
+            return {
+                "status": SERVICE_RESPONSE_STATUS_FAIL,
+                "code": SERVICE_RESPONSE_CODE_INVALID_CODE,
+            }
 
-            return {"status": "success"}
-        return {"status": "fail", "code": "invalid_code"}
+        self._async_update_state(STATE_ALARM_ARMED_CUSTOM_BYPASS)
+
+        return {"status": SERVICE_RESPONSE_STATUS_SUCCESS}
 
     async def async_alarm_trigger(self, code: str | None = None) -> None:
         """Send alarm trigger command.

@@ -69,6 +69,10 @@ CONDITION_ARMED_NIGHT: Final = "is_armed_night"
 CONDITION_ARMED_VACATION: Final = "is_armed_vacation"
 CONDITION_ARMED_CUSTOM_BYPASS: Final = "is_armed_custom_bypass"
 
+SERVICE_RESPONSE_STATUS_SUCCESS = "success"
+SERVICE_RESPONSE_STATUS_FAIL = "fail"
+SERVICE_RESPONSE_CODE_INVALID_CODE = "invalid_code"
+
 # These can be removed if no deprecated constant are in this module anymore
 __getattr__ = partial(check_if_deprecated_constant, module_globals=globals())
 __dir__ = partial(
