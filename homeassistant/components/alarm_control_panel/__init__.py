@@ -20,7 +20,7 @@ from homeassistant.const import (
     SERVICE_ALARM_DISARM,
     SERVICE_ALARM_TRIGGER,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceResponse, SupportsResponse
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.config_validation import make_entity_service_schema
 from homeassistant.helpers.deprecation import (
@@ -77,37 +77,45 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     await component.async_setup(config)
 
     component.async_register_entity_service(
-        SERVICE_ALARM_DISARM, ALARM_SERVICE_SCHEMA, "async_alarm_disarm"
+        SERVICE_ALARM_DISARM,
+        ALARM_SERVICE_SCHEMA,
+        "async_alarm_disarm",
+        supports_response=SupportsResponse.OPTIONAL,
     )
     component.async_register_entity_service(
         SERVICE_ALARM_ARM_HOME,
         ALARM_SERVICE_SCHEMA,
         "async_alarm_arm_home",
         [AlarmControlPanelEntityFeature.ARM_HOME],
+        supports_response=SupportsResponse.OPTIONAL,
     )
     component.async_register_entity_service(
         SERVICE_ALARM_ARM_AWAY,
         ALARM_SERVICE_SCHEMA,
         "async_alarm_arm_away",
         [AlarmControlPanelEntityFeature.ARM_AWAY],
+        supports_response=SupportsResponse.OPTIONAL,
     )
     component.async_register_entity_service(
         SERVICE_ALARM_ARM_NIGHT,
         ALARM_SERVICE_SCHEMA,
         "async_alarm_arm_night",
         [AlarmControlPanelEntityFeature.ARM_NIGHT],
+        supports_response=SupportsResponse.OPTIONAL,
     )
     component.async_register_entity_service(
         SERVICE_ALARM_ARM_VACATION,
         ALARM_SERVICE_SCHEMA,
         "async_alarm_arm_vacation",
         [AlarmControlPanelEntityFeature.ARM_VACATION],
+        supports_response=SupportsResponse.OPTIONAL,
     )
     component.async_register_entity_service(
         SERVICE_ALARM_ARM_CUSTOM_BYPASS,
         ALARM_SERVICE_SCHEMA,
         "async_alarm_arm_custom_bypass",
         [AlarmControlPanelEntityFeature.ARM_CUSTOM_BYPASS],
+        supports_response=SupportsResponse.OPTIONAL,
     )
     component.async_register_entity_service(
         SERVICE_ALARM_TRIGGER,
@@ -169,45 +177,47 @@ class AlarmControlPanelEntity(Entity, cached_properties=CACHED_PROPERTIES_WITH_A
         """Whether the code is required for arm actions."""
         return self._attr_code_arm_required
 
-    def alarm_disarm(self, code: str | None = None) -> None:
+    def alarm_disarm(self, code: str | None = None) -> ServiceResponse:
         """Send disarm command."""
         raise NotImplementedError()
 
-    async def async_alarm_disarm(self, code: str | None = None) -> None:
+    async def async_alarm_disarm(self, code: str | None = None) -> ServiceResponse:
         """Send disarm command."""
-        await self.hass.async_add_executor_job(self.alarm_disarm, code)
+        return await self.hass.async_add_executor_job(self.alarm_disarm, code)
 
-    def alarm_arm_home(self, code: str | None = None) -> None:
+    def alarm_arm_home(self, code: str | None = None) -> ServiceResponse:
         """Send arm home command."""
         raise NotImplementedError()
 
-    async def async_alarm_arm_home(self, code: str | None = None) -> None:
+    async def async_alarm_arm_home(self, code: str | None = None) -> ServiceResponse:
         """Send arm home command."""
-        await self.hass.async_add_executor_job(self.alarm_arm_home, code)
+        return await self.hass.async_add_executor_job(self.alarm_arm_home, code)
 
-    def alarm_arm_away(self, code: str | None = None) -> None:
+    def alarm_arm_away(self, code: str | None = None) -> ServiceResponse:
         """Send arm away command."""
         raise NotImplementedError()
 
-    async def async_alarm_arm_away(self, code: str | None = None) -> None:
+    async def async_alarm_arm_away(self, code: str | None = None) -> ServiceResponse:
         """Send arm away command."""
-        await self.hass.async_add_executor_job(self.alarm_arm_away, code)
+        return await self.hass.async_add_executor_job(self.alarm_arm_away, code)
 
-    def alarm_arm_night(self, code: str | None = None) -> None:
+    def alarm_arm_night(self, code: str | None = None) -> ServiceResponse:
         """Send arm night command."""
         raise NotImplementedError()
 
-    async def async_alarm_arm_night(self, code: str | None = None) -> None:
+    async def async_alarm_arm_night(self, code: str | None = None) -> ServiceResponse:
         """Send arm night command."""
-        await self.hass.async_add_executor_job(self.alarm_arm_night, code)
+        return await self.hass.async_add_executor_job(self.alarm_arm_night, code)
 
-    def alarm_arm_vacation(self, code: str | None = None) -> None:
+    def alarm_arm_vacation(self, code: str | None = None) -> ServiceResponse:
         """Send arm vacation command."""
         raise NotImplementedError()
 
-    async def async_alarm_arm_vacation(self, code: str | None = None) -> None:
+    async def async_alarm_arm_vacation(
+        self, code: str | None = None
+    ) -> ServiceResponse:
         """Send arm vacation command."""
-        await self.hass.async_add_executor_job(self.alarm_arm_vacation, code)
+        return await self.hass.async_add_executor_job(self.alarm_arm_vacation, code)
 
     def alarm_trigger(self, code: str | None = None) -> None:
         """Send alarm trigger command."""
@@ -217,13 +227,17 @@ class AlarmControlPanelEntity(Entity, cached_properties=CACHED_PROPERTIES_WITH_A
         """Send alarm trigger command."""
         await self.hass.async_add_executor_job(self.alarm_trigger, code)
 
-    def alarm_arm_custom_bypass(self, code: str | None = None) -> None:
+    def alarm_arm_custom_bypass(self, code: str | None = None) -> ServiceResponse:
         """Send arm custom bypass command."""
         raise NotImplementedError()
 
-    async def async_alarm_arm_custom_bypass(self, code: str | None = None) -> None:
+    async def async_alarm_arm_custom_bypass(
+        self, code: str | None = None
+    ) -> ServiceResponse:
         """Send arm custom bypass command."""
-        await self.hass.async_add_executor_job(self.alarm_arm_custom_bypass, code)
+        return await self.hass.async_add_executor_job(
+            self.alarm_arm_custom_bypass, code
+        )
 
     @cached_property
     def supported_features(self) -> AlarmControlPanelEntityFeature:

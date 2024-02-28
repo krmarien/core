@@ -738,7 +738,7 @@ _INHERITANCE_MATCH: dict[str, list[ClassTypeHintMatch]] = {
                     named_arg_types={
                         "code": "str | None",
                     },
-                    return_type=None,
+                    return_type=[None, "ServiceResponse"],
                     has_async_counterpart=True,
                 ),
                 TypeHintMatch(
@@ -746,7 +746,7 @@ _INHERITANCE_MATCH: dict[str, list[ClassTypeHintMatch]] = {
                     named_arg_types={
                         "code": "str | None",
                     },
-                    return_type=None,
+                    return_type=[None, "ServiceResponse"],
                     has_async_counterpart=True,
                 ),
                 TypeHintMatch(
@@ -754,7 +754,7 @@ _INHERITANCE_MATCH: dict[str, list[ClassTypeHintMatch]] = {
                     named_arg_types={
                         "code": "str | None",
                     },
-                    return_type=None,
+                    return_type=[None, "ServiceResponse"],
                     has_async_counterpart=True,
                 ),
                 TypeHintMatch(
@@ -762,7 +762,7 @@ _INHERITANCE_MATCH: dict[str, list[ClassTypeHintMatch]] = {
                     named_arg_types={
                         "code": "str | None",
                     },
-                    return_type=None,
+                    return_type=[None, "ServiceResponse"],
                     has_async_counterpart=True,
                 ),
                 TypeHintMatch(
@@ -770,7 +770,7 @@ _INHERITANCE_MATCH: dict[str, list[ClassTypeHintMatch]] = {
                     named_arg_types={
                         "code": "str | None",
                     },
-                    return_type=None,
+                    return_type=[None, "ServiceResponse"],
                     has_async_counterpart=True,
                 ),
                 TypeHintMatch(
@@ -786,7 +786,7 @@ _INHERITANCE_MATCH: dict[str, list[ClassTypeHintMatch]] = {
                     named_arg_types={
                         "code": "str | None",
                     },
-                    return_type=None,
+                    return_type=[None, "ServiceResponse"],
                     has_async_counterpart=True,
                 ),
             ],
