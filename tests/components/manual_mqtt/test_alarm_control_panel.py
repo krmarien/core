@@ -24,7 +24,6 @@ from homeassistant.const import (
     STATE_ALARM_TRIGGERED,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.setup import async_setup_component
 import homeassistant.util.dt as dt_util
 
@@ -112,12 +111,15 @@ async def test_no_pending(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         alarm_control_panel.DOMAIN,
         service,
         {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: CODE},
         blocking=True,
+        return_response=True,
     )
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == expected_state
 
@@ -161,12 +163,15 @@ async def test_no_pending_when_code_not_req(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         alarm_control_panel.DOMAIN,
         service,
         {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: CODE},
         blocking=True,
+        return_response=True,
     )
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == expected_state
 
@@ -209,12 +214,15 @@ async def test_with_pending(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         alarm_control_panel.DOMAIN,
         service,
         {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: CODE},
         blocking=True,
+        return_response=True,
     )
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_PENDING
 
@@ -233,12 +241,15 @@ async def test_with_pending(
     assert state.state == expected_state
 
     # Do not go to the pending state when updating to the same state
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         alarm_control_panel.DOMAIN,
         service,
         {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: CODE},
         blocking=True,
+        return_response=True,
     )
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == expected_state
 
@@ -281,13 +292,17 @@ async def test_with_invalid_code(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    with pytest.raises(HomeAssistantError, match=r"^Invalid alarm code provided$"):
-        await hass.services.async_call(
-            alarm_control_panel.DOMAIN,
-            service,
-            {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: f"{CODE}2"},
-            blocking=True,
-        )
+    response = await hass.services.async_call(
+        alarm_control_panel.DOMAIN,
+        service,
+        {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: f"{CODE}2"},
+        blocking=True,
+        return_response=True,
+    )
+
+    assert response == {
+        "alarm_control_panel.test": {"status": "fail", "code": "invalid_code"}
+    }
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
@@ -330,12 +345,15 @@ async def test_with_template_code(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         alarm_control_panel.DOMAIN,
         service,
         {ATTR_ENTITY_ID: "alarm_control_panel.test", ATTR_CODE: "abc"},
         blocking=True,
+        return_response=True,
     )
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     state = hass.states.get(entity_id)
     assert state.state == expected_state
@@ -376,12 +394,15 @@ async def test_with_specific_pending(
 
     entity_id = "alarm_control_panel.test"
 
-    await hass.services.async_call(
+    response = await hass.services.async_call(
         alarm_control_panel.DOMAIN,
         service,
         {ATTR_ENTITY_ID: "alarm_control_panel.test"},
         blocking=True,
+        return_response=True,
     )
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_PENDING
 
@@ -462,7 +483,9 @@ async def test_trigger_with_delay(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE)
+    response = await common.async_alarm_arm_away(hass, CODE)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -774,7 +797,9 @@ async def test_back_to_back_trigger_with_no_disarm_after_trigger(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE, entity_id)
+    response = await common.async_alarm_arm_away(hass, CODE, entity_id)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -835,7 +860,9 @@ async def test_disarm_while_pending_trigger(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_PENDING
 
-    await common.async_alarm_disarm(hass, entity_id=entity_id)
+    response = await common.async_alarm_disarm(hass, entity_id=entity_id)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
@@ -883,8 +910,11 @@ async def test_disarm_during_trigger_with_invalid_code(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_PENDING
 
-    with pytest.raises(HomeAssistantError, match=r"Invalid alarm code provided$"):
-        await common.async_alarm_disarm(hass, entity_id=entity_id)
+    response = await common.async_alarm_disarm(hass, entity_id=entity_id)
+
+    assert response == {
+        "alarm_control_panel.test": {"status": "fail", "code": "invalid_code"}
+    }
 
     assert hass.states.get(entity_id).state == STATE_ALARM_PENDING
 
@@ -926,7 +956,9 @@ async def test_trigger_with_unused_specific_delay(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE)
+    response = await common.async_alarm_arm_away(hass, CODE)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -975,7 +1007,9 @@ async def test_trigger_with_specific_delay(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE)
+    response = await common.async_alarm_arm_away(hass, CODE)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -1024,7 +1058,9 @@ async def test_trigger_with_pending_and_delay(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE)
+    response = await common.async_alarm_arm_away(hass, CODE)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -1086,7 +1122,9 @@ async def test_trigger_with_pending_and_specific_delay(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE)
+    response = await common.async_alarm_arm_away(hass, CODE)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -1195,7 +1233,9 @@ async def test_trigger_with_no_disarm_after_trigger(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE, entity_id)
+    response = await common.async_alarm_arm_away(hass, CODE, entity_id)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     assert hass.states.get(entity_id).state == STATE_ALARM_ARMED_AWAY
 
@@ -1242,7 +1282,9 @@ async def test_arm_away_after_disabled_disarmed(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_away(hass, CODE)
+    response = await common.async_alarm_arm_away(hass, CODE)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     state = hass.states.get(entity_id)
     assert state.state == STATE_ALARM_PENDING
@@ -1305,18 +1347,25 @@ async def test_disarm_with_template_code(
 
     assert hass.states.get(entity_id).state == STATE_ALARM_DISARMED
 
-    await common.async_alarm_arm_home(hass, "def")
+    response = await common.async_alarm_arm_home(hass, "def")
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     state = hass.states.get(entity_id)
     assert state.state == STATE_ALARM_ARMED_HOME
 
-    with pytest.raises(HomeAssistantError, match=r"Invalid alarm code provided$"):
-        await common.async_alarm_disarm(hass, "def")
+    response = await common.async_alarm_disarm(hass, "def")
+
+    assert response == {
+        "alarm_control_panel.test": {"status": "fail", "code": "invalid_code"}
+    }
 
     state = hass.states.get(entity_id)
     assert state.state == STATE_ALARM_ARMED_HOME
 
-    await common.async_alarm_disarm(hass, "abc")
+    response = await common.async_alarm_disarm(hass, "abc")
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
 
     state = hass.states.get(entity_id)
     assert state.state == STATE_ALARM_DISARMED
@@ -1441,7 +1490,10 @@ async def test_state_changes_are_published_to_mqtt(
     mqtt_mock.async_publish.reset_mock()
 
     # Arm in home mode
-    await common.async_alarm_arm_home(hass)
+    response = await common.async_alarm_arm_home(hass)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
+
     await hass.async_block_till_done()
     mqtt_mock.async_publish.assert_called_once_with(
         "alarm/state", STATE_ALARM_PENDING, 0, True
@@ -1461,7 +1513,10 @@ async def test_state_changes_are_published_to_mqtt(
     mqtt_mock.async_publish.reset_mock()
 
     # Arm in away mode
-    await common.async_alarm_arm_away(hass)
+    response = await common.async_alarm_arm_away(hass)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
+
     await hass.async_block_till_done()
     mqtt_mock.async_publish.assert_called_once_with(
         "alarm/state", STATE_ALARM_PENDING, 0, True
@@ -1481,7 +1536,10 @@ async def test_state_changes_are_published_to_mqtt(
     mqtt_mock.async_publish.reset_mock()
 
     # Arm in night mode
-    await common.async_alarm_arm_night(hass)
+    response = await common.async_alarm_arm_night(hass)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
+
     await hass.async_block_till_done()
     mqtt_mock.async_publish.assert_called_once_with(
         "alarm/state", STATE_ALARM_PENDING, 0, True
@@ -1501,7 +1559,10 @@ async def test_state_changes_are_published_to_mqtt(
     mqtt_mock.async_publish.reset_mock()
 
     # Disarm
-    await common.async_alarm_disarm(hass)
+    response = await common.async_alarm_disarm(hass)
+
+    assert response == {"alarm_control_panel.test": {"status": "success"}}
+
     await hass.async_block_till_done()
     mqtt_mock.async_publish.assert_called_once_with(
         "alarm/state", STATE_ALARM_DISARMED, 0, True
